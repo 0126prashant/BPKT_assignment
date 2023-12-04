@@ -1,16 +1,24 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Box,Button, Table, Thead, Tbody, Tr,Th, Td, Input, Heading} from "@chakra-ui/react";
+import { Box,Button, Table, Thead, Tbody, Tr,Th, Td, Input, Heading, useToast} from "@chakra-ui/react";
 
 export const View = ({ data, fetchData }) => {
   const [edtStuId, setEditstu] = useState(null);
   const [editDataSt, setEditedData] = useState({});
+  const toast = useToast();
 
   const handleDelete = async (edtStuId) => {
     // console.log(edtStuId,"studentId")
     try {
-      await axios.delete(`${process.env.PORT}/${edtStuId}`);
+      await axios.delete(`${process.env.url}${edtStuId}`);
       fetchData();
+      toast({
+        title: "Student Deleted",
+        description: "Student data has been Deleted",
+        status: "warning",
+        duration: 3000, 
+        isClosable: true,
+      });
     } catch (error) {
       console.log(error);
     }
@@ -23,8 +31,15 @@ export const View = ({ data, fetchData }) => {
 
   const handleSaveUpdate = async () => {
     try {
-      await axios.patch(`${process.env.PORT}/${edtStuId}`,editDataSt);
+      await axios.patch(`${process.env.url}/${edtStuId}`,editDataSt);
       fetchData();
+      toast({
+        title: "Student Edited",
+        description: "Student data has been Edited",
+        status: "success",
+        duration: 3000, 
+        isClosable: true,
+      });
       setEditstu(null);
     } catch (error) {
       console.log(error);
@@ -36,6 +51,8 @@ export const View = ({ data, fetchData }) => {
     setEditedData({});
   };
 
+ 
+
   return (
     <Box>
       <Heading as="h1" size="lg" mb={6} textAlign="center">Student Data </Heading>
@@ -44,6 +61,7 @@ export const View = ({ data, fetchData }) => {
           <Tr>
             <Th>Name</Th>
             <Th>Major</Th>
+            <Th>Address</Th>
             <Th>Enrollment Date</Th>
             <Th>Action</Th>
           </Tr>
@@ -63,6 +81,12 @@ export const View = ({ data, fetchData }) => {
                   <Input value={editDataSt.major}
                     onChange={(e) => setEditedData({ ...editDataSt, major: e.target.value }) } />
                 ) :( ele.major )}
+              </Td>
+              <Td>
+                {edtStuId ==ele._id ? (
+                  <Input value={editDataSt.address}
+                    onChange={(e) => setEditedData({ ...editDataSt, address: e.target.value }) } />
+                ) :( ele.address )}
               </Td>
               <Td>
                 {edtStuId ==ele._id ? (

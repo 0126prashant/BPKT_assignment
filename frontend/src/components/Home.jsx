@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { View } from "./View";
-import {Box,Heading,VStack,FormControl,FormLabel,Input,Button,} from "@chakra-ui/react";
+import {Box,Heading,VStack,FormControl,FormLabel,Input,Button, useToast,} from "@chakra-ui/react";
+
 
 export const Home = () => {
   const [data, setData] = useState([]);
+  const toast = useToast();
   const [formData, setFormData] = useState({
     name: "",
     major: "",
@@ -18,22 +20,47 @@ export const Home = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${process.env.PORT}`);
+      const res = await axios.get(`${process.env.url}`);
       setData(res.data);
     } catch (error) {
       console.log(error);
     }
   };
-
+ // date validation
+ const dateValid = (selectedDate) => {
+  const currentDate = new Date();
+  const selectedDateObj = new Date(selectedDate);
+  return selectedDateObj >= currentDate;
+};
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post(`${process.env.PORT}/add`,formData)
+
+    if (!dateValid(formData.enrollmentDate)) {
+      toast({
+        title: "Invalid Date",
+        description: "Please select present or future date.",
+        status: "error",
+        duration: 3000, 
+        isClosable: true,
+      });
+      return;
+      
+    }
+   
+
+    axios.post(`${process.env.url}add`,formData)
       .then((res) => {
         setFormData({name: "",major: "",address: "",enrollmentDate: "",});
+        toast({
+          title: "Student Added",
+          description: "New student has been added",
+          status: "success",
+          duration: 3000, 
+          isClosable: true,
+        });
       })
       .catch((err) => console.log(err));
   };
-
   return (
     <Box p={4} display="flex" justifyContent="center" alignItems="center" >
       <VStack align="center" spacing={6} width="100%">
@@ -65,7 +92,7 @@ export const Home = () => {
                     setFormData({ ...formData, enrollmentDate: e.target.value }) }  />
               </FormControl>
 
-              <Button type="submit" colorScheme="teal" mt={4} width="100%"> Submit </Button>
+              <Button type="submit" colorScheme="teal" mt={4} width="100%" > Submit </Button>
             </VStack>
           </form>
         </Box>
